@@ -4,12 +4,21 @@
 \alias{install_version}
 \title{Install specific version of a package.}
 \usage{
-install_version(package, version = NULL, dependencies = NA,
-  upgrade = c("default", "ask", "always", "never"), force = FALSE,
-  quiet = FALSE, build = FALSE, build_opts = c("--no-resave-data",
-  "--no-manual", "--no-build-vignettes"), build_manual = FALSE,
-  build_vignettes = FALSE, repos = getOption("repos"),
-  type = "source", ...)
+install_version(
+  package,
+  version = NULL,
+  dependencies = NA,
+  upgrade = c("default", "ask", "always", "never"),
+  force = FALSE,
+  quiet = FALSE,
+  build = FALSE,
+  build_opts = c("--no-resave-data", "--no-manual", "--no-build-vignettes"),
+  build_manual = FALSE,
+  build_vignettes = FALSE,
+  repos = getOption("repos"),
+  type = "source",
+  ...
+)
 }
 \arguments{
 \item{package}{Name of the package to install.}
@@ -60,7 +69,7 @@ since the previous install.}
 
 \item{build}{If \code{TRUE} build the package before installing.}
 
-\item{build_opts}{Options to pass to \code{R CMD build}, only used when \code{build}}
+\item{build_opts}{Options to pass to \verb{R CMD build}, only used when \code{build}}
 
 \item{build_manual}{If \code{FALSE}, don't build PDF manual ('--no-manual').}
 
@@ -112,13 +121,17 @@ install_version('mypackage', '1.16-39487')  # finds in 'dev'
 }
 }
 \seealso{
-Other package installation: \code{\link{install_bioc}},
-  \code{\link{install_bitbucket}},
-  \code{\link{install_cran}}, \code{\link{install_dev}},
-  \code{\link{install_github}},
-  \code{\link{install_gitlab}}, \code{\link{install_git}},
-  \code{\link{install_local}}, \code{\link{install_svn}},
-  \code{\link{install_url}}
+Other package installation: 
+\code{\link{install_bioc}()},
+\code{\link{install_bitbucket}()},
+\code{\link{install_cran}()},
+\code{\link{install_dev}()},
+\code{\link{install_github}()},
+\code{\link{install_gitlab}()},
+\code{\link{install_git}()},
+\code{\link{install_local}()},
+\code{\link{install_svn}()},
+\code{\link{install_url}()}
 }
 \author{
 Jeremy Stephens and Ken Williams

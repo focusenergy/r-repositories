@@ -1,5 +1,34 @@
 # remotes (development version)
 
+* Another fix for the mixed binary and source dependency issue, it should hopefully be fully squashed now (#296)
+* The upgrade menu is now interruptible in RStudio (#489)
+
+# remotes 2.1.1
+
+## Minor improvements and fixes
+
+* Installing mixed binary and source dependencies when the latest versions of
+  some packages do not have binaries yet should now install dependencies in the
+  correct order to prevent load failures (#296)
+
+* `github_error()` now also works when a GitHub (Enterprise) server does not
+  return information about the rate limit (@dpprdan, #396, #413).
+
+* `install_gitlab` passes the `quiet` argument on to `gitlab_pat` (@michaelchirico, #437)
+
+* `remotes` is now resilient against installed packages that declare
+  `RemoteType: standard` but do not include a `RemoteRepos` or `RemotePkgType`
+  field. In such a case, the values for `getOption("repos")` and
+  `getOption("pkgType")` will be used (respectively).
+
+* `install_gitlab()` now installs from repositories in subgroups and with dots 
+  in their name. `subdir` is now an explicit argument instead of implicit in 
+  `repo` (@robertdj, #259, #420).
+
+* `install()` now passes the ellipsis `...` to `install_deps()` (@Neil-Schneider, #411)
+
+* The tests have been updated to work with newer versions of callr and R 4.0
+
 # remotes 2.1.0
 
 ## New features
@@ -57,15 +86,17 @@
 
 * Bioc `remote_sha()` now always returns a character result (#379)
 
-* Fix API call for private repositories in `install_gitlab` 
+* Fix API call for private repositories in `install_gitlab`
   (@aornugent, #359, #363)
 
 * git submodules now work if the submodule file is empty (@muschellij2, #234)
 
+* git submodules now work if the R package is stored in a subfolder (@pommedeterresautee, #233)
+
 * `install_gitlab()` no longer adds the access token twice to the request
   (@aornugent, #363).
 
-* Bitbucket dependencies now actually use the `BITBUCKET_USER` and 
+* Bitbucket dependencies now actually use the `BITBUCKET_USER` and
   `BITBUCKET_PASSWORD` environment variables (@antoine-sachet, #347).
 
 * `parse_deps()` now ignores trailing whitespaces around comparison operators
@@ -130,15 +161,15 @@
   set up proxies, see `?download.file`.
 * Remotes without package names are now unconditionally installed (#246).
 
-* `install_github()` now includes a more informative error message when the 
+* `install_github()` now includes a more informative error message when the
   status code is 404, asking the user to check that they have spelled the
-  repo owner and repo correctly (included in the error message), and that 
+  repo owner and repo correctly (included in the error message), and that
   they have the required permissions to access the repository.
 
 * `install_*` functions (via the underlying private `install` function) now set
   `RGL_USE_NULL="TRUE"` in order to avoid errors when running headless
   and installing any package using `rgl` (@jefferis, ##333)
-  
+
 # remotes 2.0.2
 
 * `install_deps()` now installs un-installed remotes packages even when

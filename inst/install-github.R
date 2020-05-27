@@ -72,7 +72,8 @@ function(...) {
   #'
   #' \section{NEWS:}
   #' * 2019-05-30 First version in remotes.
-  #'
+  #' * 2020-03-22 get_matching_bioc_version() is now correct if the current
+  #'              R version is not in the builtin mapping.
   #'
   #' @name bioconductor
   #' @keywords internal
@@ -108,7 +109,8 @@ function(...) {
       "3.2"  = package_version("3.2"),
       "3.3"  = package_version("3.4"),
       "3.4"  = package_version("3.6"),
-      "3.5"  = package_version("3.8")
+      "3.5"  = package_version("3.8"),
+      "3.6"  = package_version("3.10")
     )
   
     # -------------------------------------------------------------------
@@ -207,10 +209,24 @@ function(...) {
       if (minor %in% names(builtin_map)) return(builtin_map[[minor]])
   
       # If we are not in the map, then we need to look this up in
-      # YAML data.
+      # YAML data. It is possible that the current R version matches multiple
+      # Bioc versions. Then we choose the latest released version. If none
+      # of them were released (e.g. they are 'devel' and 'future'), then
+      # we'll use the 'devel' version.
   
       map <- get_version_map(forget = forget)
-      mine <- match(package_version(minor), map$r_version)
+      mine <- which(package_version(minor) == map$r_version)
+      if (length(mine) == 0) {
+        mine <- NA
+      } else if (length(mine) > 1) {
+        if ("release" %in% map$bioc_status[mine]) {
+          mine <- mine["release" == map$bioc_status[mine]]
+        } else if ("devel" %in% map$bioc_status[mine]) {
+          mine <- mine["devel" == map$bioc_status[mine]]
+        } else {
+          mine <- rev(mine)[1]
+        }
+      }
       if (!is.na(mine)) return(map$bioc_version[mine])
   
       # If it is not even in the YAML, then it must be some very old
@@ -895,7 +911,10 @@ function(...) {
       rec_flat <- character()
     }
   
-    unique(c(if (include_pkgs) packages, top_flat, rec_flat))
+    # We need to put the recursive dependencies _before_ the top dependencies and
+    # input packages, to ensure that any dependencies are installed before
+    # their parents are loaded.
+    unique(c(rec_flat, top_flat, if (include_pkgs) packages))
   }
   
   #' Standardise dependencies using the same logical as [install.packages]
@@ -1106,7 +1125,7 @@ function(...) {
           choices <- c("All", "CRAN packages only", "None", choices)
         }
   
-        res <- select_menu(choices, title = "These packages have more recent versions available.\nWhich would you like to update?")
+        res <- select_menu(choices, title = "These packages have more recent versions available.\nIt is recommended to update all of them.\nWhich would you like to update?")
   
         if ("None" %in% res || length(res) == 0) {
           return(x[uninstalled, ])
@@ -1138,8 +1157,7 @@ function(...) {
     fop <- format(op)
     cat("", fop, "", sep = "\n")
     repeat {
-      cat(msg, "\n", sep = "")
-      answer <- readLines(n = 1)
+      answer <- readline(msg)
       answer <- strsplit(answer, "[ ,]+")[[1]]
       if (all(answer %in% seq_along(choices))) {
         return(choices[as.integer(answer)])
@@ -1753,11 +1771,11 @@ function(...) {
   github_error <- function(res) {
     res_headers <- curl::parse_headers_list(res$headers)
   
-    ratelimit_limit <- res_headers$`x-ratelimit-limit`
+    ratelimit_limit <- res_headers$`x-ratelimit-limit` %||% NA_character_
   
-    ratelimit_remaining <- res_headers$`x-ratelimit-remaining`
+    ratelimit_remaining <- res_headers$`x-ratelimit-remaining` %||% NA_character_
   
-    ratelimit_reset <- .POSIXct(res_headers$`x-ratelimit-reset`, tz = "UTC")
+    ratelimit_reset <- .POSIXct(res_headers$`x-ratelimit-reset` %||% NA_character_, tz = "UTC")
   
     error_details <- json$parse(rawToChar(res$content))$message
   
@@ -1788,7 +1806,7 @@ function(...) {
     - If spelling is correct, check that you have the required permissions to access the repo."
       }
     }
-   if(identical(as.integer(res$status_code),404L)) {
+   if(identical(as.integer(res$status_code), 404L)) {
      msg <- sprintf(
        "HTTP error %s.
     %s
@@ -1799,7 +1817,7 @@ function(...) {
        error_details,
        guidance
      )
-   } else {
+   } else if (!is.na(ratelimit_limit)) {
     msg <- sprintf(
   "HTTP error %s.
     %s
@@ -1816,6 +1834,14 @@ function(...) {
       format(ratelimit_reset, usetz = TRUE),
       guidance
     )
+   } else {
+     msg <- sprintf(
+       "HTTP error %s.
+    %s",
+  
+       res$status_code,
+       error_details
+     )
    }
   
    status_type <- (as.integer(res$status_code) %/% 100) * 100
@@ -2797,7 +2823,7 @@ function(...) {
   install_github <- function(repo,
                              ref = "master",
                              subdir = NULL,
-                             auth_token = github_pat(),
+                             auth_token = github_pat(quiet),
                              host = "api.github.com",
                              dependencies = NA,
                              upgrade = c("default", "ask", "always", "never"),
@@ -3017,7 +3043,7 @@ function(...) {
   #'
   #' @inheritParams install_github
   #' @param repo Repository address in the format
-  #'   `username/repo[/subdir][@@ref]`.
+  #'   `username/repo[@@ref]`.
   #' @param host GitLab API host to use. Override with your GitLab enterprise
   #'   hostname, for example, `"gitlab.hostname.com"`.
   #' @param auth_token To install from a private repo, generate a personal access
@@ -3033,7 +3059,8 @@ function(...) {
   #' install_gitlab("jimhester/covr")
   #' }
   install_gitlab <- function(repo,
-                             auth_token = gitlab_pat(),
+                             subdir = NULL,
+                             auth_token = gitlab_pat(quiet),
                              host = "gitlab.com",
                              dependencies = NA,
                              upgrade = c("default", "ask", "always", "never"),
@@ -3045,7 +3072,7 @@ function(...) {
                              type = getOption("pkgType"),
                              ...) {
   
-    remotes <- lapply(repo, gitlab_remote, auth_token = auth_token, host = host)
+    remotes <- lapply(repo, gitlab_remote, subdir = subdir, auth_token = auth_token, host = host)
   
     install_remotes(remotes, auth_token = auth_token, host = host,
                     dependencies = dependencies,
@@ -3061,7 +3088,7 @@ function(...) {
                     ...)
   }
   
-  gitlab_remote <- function(repo,
+  gitlab_remote <- function(repo, subdir = NULL,
                          auth_token = gitlab_pat(), sha = NULL,
                          host = "gitlab.com", ...) {
   
@@ -3070,8 +3097,8 @@ function(...) {
   
     remote("gitlab",
       host = host,
-      repo = meta$repo,
-      subdir = meta$subdir,
+      repo = paste(c(meta$repo, meta$subdir), collapse = "/"),
+      subdir = subdir,
       username = meta$username,
       ref = meta$ref,
       sha = sha,
@@ -3083,7 +3110,9 @@ function(...) {
   remote_download.gitlab_remote <- function(x, quiet = FALSE) {
     dest <- tempfile(fileext = paste0(".tar.gz"))
   
-    src_root <- build_url(x$host, "api", "v4", "projects", utils::URLencode(paste0(x$username, "/", x$repo), reserved = TRUE))
+    project_id <- gitlab_project_id(x$username, x$repo, x$ref, x$host, x$auth_token)
+  
+    src_root <- build_url(x$host, "api", "v4", "projects", project_id)
     src <- paste0(src_root, "/repository/archive.tar.gz?sha=", utils::URLencode(x$ref, reserved = TRUE))
   
     if (!quiet) {
@@ -3180,6 +3209,17 @@ function(...) {
       return(pat)
     }
     return(NULL)
+  }
+  
+  gitlab_project_id <- function(username, repo, ref = "master",
+    host = "gitlab.com", pat = gitlab_pat()) {
+  
+    url <- build_url(host, "api", "v4", "projects", utils::URLencode(paste0(username, "/", repo), reserved = TRUE), "repository", "commits", ref)
+  
+    tmp <- tempfile()
+    download(tmp, url, headers = c("Private-Token" = pat))
+  
+    json$parse_file(tmp)$project_id
   }
   # Contents of R/install-local.R
   
@@ -3348,7 +3388,7 @@ function(...) {
     source <- source_pkg(bundle, subdir = remote$subdir)
     on.exit(unlink(source, recursive = TRUE), add = TRUE)
   
-    update_submodules(source, quiet)
+    update_submodules(source, remote$subdir, quiet)
   
     add_metadata(source, remote_metadata(remote, bundle, source, remote_sha))
   
@@ -3494,8 +3534,8 @@ function(...) {
     switch(x$RemoteType,
       standard = remote("cran",
         name = x$Package,
-        repos = x$RemoteRepos,
-        pkg_type = x$RemotePkgType,
+        repos = x$RemoteRepos %||% repos,
+        pkg_type = x$RemotePkgType %||% type,
         sha = x$RemoteSha),
       github = remote("github",
         host = x$RemoteHost,
@@ -3551,7 +3591,7 @@ function(...) {
         url = trim_ws(x$RemoteUrl),
         subdir = x$RemoteSubdir,
         config = x$RemoteConfig,
-        pkg_type = x$RemotePkgType),
+        pkg_type = x$RemotePkgType %||% type),
       bioc_git2r = remote("bioc_git2r",
         mirror = x$RemoteMirror,
         repo = x$RemoteRepo,
@@ -4009,7 +4049,7 @@ function(...) {
     install_deps(pkgdir, dependencies = dependencies, quiet = quiet,
       build = build, build_opts = build_opts, build_manual = build_manual,
       build_vignettes = build_vignettes, upgrade = upgrade, repos = repos,
-      type = type)
+      type = type, ...)
   
     if (isTRUE(build)) {
       dir <- tempfile()
@@ -4646,10 +4686,20 @@ function(...) {
     git(paste0(args, collapse = " "), quiet = quiet)
   }
   
-  update_submodules <- function(source, quiet) {
+  update_submodules <- function(source, subdir, quiet) {
     file <- file.path(source, ".gitmodules")
+  
     if (!file.exists(file)) {
-      return()
+  
+      if (!is.null(subdir)) {
+        nb_sub_folders <- lengths(strsplit(subdir, "/"))
+        source <- do.call(file.path, as.list(c(source, rep("..", nb_sub_folders))))
+      }
+  
+      file <- file.path(source, ".gitmodules")
+      if (!file.exists(file)) {
+        return()
+      }
     }
     info <- parse_submodules(file)
   

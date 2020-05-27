@@ -64,7 +64,8 @@
 #'
 #' \section{NEWS:}
 #' * 2019-05-30 First version in remotes.
-#'
+#' * 2020-03-22 get_matching_bioc_version() is now correct if the current
+#'              R version is not in the builtin mapping.
 #'
 #' @name bioconductor
 #' @keywords internal
@@ -100,7 +101,8 @@ bioconductor <- local({
     "3.2"  = package_version("3.2"),
     "3.3"  = package_version("3.4"),
     "3.4"  = package_version("3.6"),
-    "3.5"  = package_version("3.8")
+    "3.5"  = package_version("3.8"),
+    "3.6"  = package_version("3.10")
   )
 
   # -------------------------------------------------------------------
@@ -199,10 +201,24 @@ bioconductor <- local({
     if (minor %in% names(builtin_map)) return(builtin_map[[minor]])
 
     # If we are not in the map, then we need to look this up in
-    # YAML data.
+    # YAML data. It is possible that the current R version matches multiple
+    # Bioc versions. Then we choose the latest released version. If none
+    # of them were released (e.g. they are 'devel' and 'future'), then
+    # we'll use the 'devel' version.
 
     map <- get_version_map(forget = forget)
-    mine <- match(package_version(minor), map$r_version)
+    mine <- which(package_version(minor) == map$r_version)
+    if (length(mine) == 0) {
+      mine <- NA
+    } else if (length(mine) > 1) {
+      if ("release" %in% map$bioc_status[mine]) {
+        mine <- mine["release" == map$bioc_status[mine]]
+      } else if ("devel" %in% map$bioc_status[mine]) {
+        mine <- mine["devel" == map$bioc_status[mine]]
+      } else {
+        mine <- rev(mine)[1]
+      }
+    }
     if (!is.na(mine)) return(map$bioc_version[mine])
 
     # If it is not even in the YAML, then it must be some very old

@@ -4,12 +4,15 @@
 > Install R Packages from remote or local repositories, 
 > including GitHub, GitLab, Bitbucket, and Bioconductor
 
+
+<!-- badges: start -->
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![Linux Build Status](https://travis-ci.org/r-lib/remotes.svg?branch=master)](https://travis-ci.org/r-lib/remotes)
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/github/r-lib/remotes?svg=true)](https://ci.appveyor.com/project/gaborcsardi/remotes)
 [![](https://www.r-pkg.org/badges/version/remotes)](https://www.r-pkg.org/pkg/remotes)
 [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/remotes)](https://www.r-pkg.org/pkg/remotes)
 [![Coverage Status](https://img.shields.io/codecov/c/github/r-lib/remotes/master.svg)](https://codecov.io/github/r-lib/remotes?branch=master)
+<!-- badges: end -->
 
 Download and install R packages stored in GitHub, GitLab, Bitbucket, 
 Bioconductor, or plain subversion or git repositories. This package
@@ -44,29 +47,6 @@ Install the released version of remotes from CRAN:
 install.packages("remotes")
 ```
 
-You can also install remotes from GitHub. If you already have a previous
-version of remotes installed, you can use that to install the
-development version:
-
-```r
-remotes::install_github("r-lib/remotes")
-```
-
-Alternatively, you can also call the supplied `install-github.R` file
-directly, from within R:
-
-```r
-source("https://raw.githubusercontent.com/r-lib/remotes/master/install-github.R")$value("r-lib/remotes")
-```
-
-The <https://install-github.me> service is also based on remotes.
-You can use it to install any R package from GitHub via sourcing a URL.
-E.g. to install remotes itself:
-
-```r
-source("https://install-github.me/r-lib/remotes")
-```
-
 ## Usage
 
 Note that most of the examples here use GitHub. See below for other
@@ -84,7 +64,8 @@ If the R package is inside a subdirectory of the root directory,
 then give this subdirectory as well:
 
 ```r
-remotes::install_github("dmlc/xgboost/R-package")
+# build = FALSE because of some specificities of XGBoost package
+install_github("dmlc/xgboost/R-package", build = FALSE)
 ```
 
 To install a certain branch or commit or tag, append it to the
@@ -180,7 +161,7 @@ process. However if you are using remotes to install or update these packages
 (or their reverse dependencies) using them during installation may fail
 (particularly on Windows).
 
-If you set the environment variable `R_REMOTES_STANDALONE=true` (e.g.
+If you set the environment variable `R_REMOTES_STANDALONE="true"` (e.g.
 in R `Sys.setenv(R_REMOTES_STANDALONE="true")`) you can force remotes to
 operate in standalone mode and use only its internal R implementations. This
 will allow successful installation of these packages.
@@ -224,20 +205,20 @@ It also uses some remotes specific options:
 
 * The `R_REMOTES_UPGRADE` environment variable can be used to set a default
   preferred value for the `upgrade =` argument accepted by the various
-  `install_*()` functions. For example, you can set `R_REMOTES_UPGRADE=always`
+  `install_*()` functions. For example, you can set `R_REMOTES_UPGRADE="always"`
   to upgrade dependent packages without asking the user.
 
-* Setting `R_REMOTES_STANDALONE=true` forces remotes to work in standalone
+* Setting `R_REMOTES_STANDALONE="true"` forces remotes to work in standalone
   mode and avoid loading its optional dependencies (curl, git2 and pkgbuild
   currently. See "Standalone mode" above.
 
-* Setting `R_REMOTES_NO_ERRORS_FROM_WARNINGS=true` avoids stopping the
+* Setting `R_REMOTES_NO_ERRORS_FROM_WARNINGS="true"` avoids stopping the
   installation for warning messages. Warnings usually mean installation
   errors, so by default remotes stops for a warning. However, sometimes
   other warnings might happen, that could be ignored by setting this
   environment variable.
 
-* Setting `_R_CHECK_FORCE_SUGGESTS_=false` while
+* Setting `_R_CHECK_FORCE_SUGGESTS_="false"` while
   `R_REMOTES_NO_ERRORS_FROM_WARNINGS` is unset will also avoid stopping the
   installation for error messages. This is done because a warning is generated
   during installation when not all Suggested packages are not available.
