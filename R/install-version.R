@@ -152,7 +152,7 @@ package_find_archives <- function(package, repo, verbose=FALSE) {
   # TODO it would be nice to cache these downloaded files like `available.packages` does
   archive <-
     tryCatch({
-      con <- gzcon(url(sprintf("%s/src/contrib/Meta/archive.rds", repo), "rb"))
+      con <- gzcon(url(.url_path(repo, "src/contrib/Meta/archive.rds"), "rb"))
       on.exit(close(con))
       readRDS(con)
     },
@@ -227,7 +227,7 @@ download_version_url <- function(package, version, repos, type, available, verbo
     for (i in rev(seq_len(nrow(info)))) {
       package_path <- row.names(info)[i]
       if (version_satisfies_criteria(version_from_tarball(package_path), version)) {
-        return(paste(repo, "src/contrib/Archive/", package_path, sep = ""))
+        return(.url_path(repo, "src/contrib/Archive", package_path))
       }
     }
   }
@@ -236,4 +236,13 @@ download_version_url <- function(package, version, repos, type, available, verbo
     stop(sprintf("couldn't find package '%s'", package))
 
   stop(sprintf("version '%s' is invalid for package '%s'", version, package))
+}
+
+#' Paste components together like file.path, but eliminate consecutive separator chars
+.url_path <- function(...) {
+  components <- c(...)
+  n <- length(components)
+  if (n > 1)
+    components[-n] <- sub('/+$', '', components[-n])
+  return(do.call(file.path, as.list(components)))
 }
