@@ -1,6 +1,15 @@
 
 # repositories
 
+<!-- badges: start -->
+[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+[![Linux Build Status](https://travis-ci.org/r-lib/repositories.svg?branch=master)](https://travis-ci.org/r-lib/repositories)
+[![Windows Build status](https://ci.appveyor.com/api/projects/status/github/r-lib/repositories?svg=true)](https://ci.appveyor.com/project/focusenergy/repositories)
+[![](https://www.r-pkg.org/badges/version/repositories)](https://www.r-pkg.org/pkg/repositories)
+[![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/repositories)](https://www.r-pkg.org/pkg/repositories)
+[![Coverage Status](https://img.shields.io/codecov/c/github/r-lib/repositories/master.svg)](https://codecov.io/github/focusenergy/repositories?branch=master)
+<!-- badges: end -->
+
 This is a fork of the [remotes](https://github.com/r-lib/remotes)
 package from RStudio, adding some features & fixes that have not been
 merged back ("yet", we hope).  See
@@ -16,7 +25,9 @@ library(repositories)
 repositories::install_version('data.table', '1.12.2')
 ```
 
-The original README from `remotes` follows:
+The original README from `remotes` follows.
+
+# remotes
 
 > Install R Packages from remote or local repositories, 
 > including GitHub, GitLab, Bitbucket, and Bioconductor
