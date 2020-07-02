@@ -16,6 +16,8 @@ library(repositories)
 repositories::install_version('data.table', '1.12.2')
 ```
 
+The original README from `remotes` follows:
+
 > Install R Packages from remote or local repositories, 
 > including GitHub, GitLab, Bitbucket, and Bioconductor
 
