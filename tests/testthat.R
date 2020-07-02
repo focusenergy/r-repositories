@@ -1,4 +1,4 @@
 library(testthat)
-library(remotes)
+library(repositories)
 
-test_check("remotes")
+test_check("repositories")

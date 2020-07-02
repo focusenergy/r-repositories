@@ -82,6 +82,8 @@ install_version <- function(package, version = NULL,
   invisible(res)
 }
 
+#' Extract the version from the name of a package tarball
+#'
 #' @param tarball_name character vector of files or paths from which to extract version numbers
 #' @return versions extracted, or `NULL` when extraction fails
 version_from_tarball <- function(tarball_name) {
@@ -89,6 +91,8 @@ version_from_tarball <- function(tarball_name) {
   ifelse(grepl(package_ver_regex, tarball_name), sub(package_ver_regex, "\\1", tarball_name), NULL)
 }
 
+#' Return whether a version satisfies a set of criteria checks
+#'
 #' @param to_check version as a string or `package_version` object
 #' @inheritParams version_criteria
 #' @return TRUE if version 'to.check' satisfies all version criteria 'criteria'
@@ -101,6 +105,8 @@ version_satisfies_criteria <- function(to_check, criteria) {
   all(result)
 }
 
+#' Return whether a package is installed and satisfies criteria
+#'
 #' @param pkg package name
 #' @inheritParams version_criteria
 #' @return TRUE if `pkg` is already installed, and its version satisfies all criteria `criteria`
@@ -109,6 +115,8 @@ package_installed <- function(pkg, criteria) {
   !is.na(v) && version_satisfies_criteria(v, criteria)
 }
 
+#' Parse a criteria string into a structure for checking versions against it
+#'
 #' @param criteria character vector expressing criteria for some version to satisfy.  Options include:
 #' \begin{itemize}
 #'   \item `NULL` or `NA`, indicating that the package must be present, but need not satisfy any

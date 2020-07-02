@@ -1,3 +1,22 @@
+# repositories (development version by Ken Williams)
+
+## Differences from `remotes`:
+
+* `install_version()` now keeps searching subsequent repositories for the
+  requested version, rather than failing if the version it finds in an early
+  repository is unsuitable.  This allows the user to use multiple repositories
+  (e.g. locally-developed packages, and CRAN) that are searched in a cascading
+  order.
+
+* `install_version()` now understands specifications like '>= 1.0' or
+  '>= 1.12.0, < 1.14' to install the first version of the package it can
+  find that satisfies the criteria.
+
+* Added `version_from_tarball()`, `version_satisfies_criteria()`, `package_installed()`,
+  and `version_criteria()` functions to help manipulate and work with package versions
+  and version specifications.  Not yet exported.
+
+
 # remotes (development version)
 
 * Another fix for the mixed binary and source dependency issue, it should hopefully be fully squashed now (#296)
@@ -75,14 +94,6 @@
 
 * `install_version()` now errors with a more informative message when `type` is
   not 'source' (#323)
-
-* `install_version()` now keeps searching subsequent repositories for the
-  requested version, rather than failing if the version it finds in an early
-  repository is unsuitable.
-
-* `install_version()` now understands specifications like '>= 1.0' or
-  '>= 1.12.0, < 1.14' to install the first version of the package it can
-  find that satisfies the criteria.
 
 * Bioc `remote_sha()` now always returns a character result (#379)
 
