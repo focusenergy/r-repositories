@@ -1,4 +1,4 @@
-Package: remotes
+Package: repositories
 Title: R Package Installation from Remote Repositories, Including 'GitHub'
 Version: 2.1.1.9000
 Authors@R: c(
@@ -12,13 +12,10 @@ Authors@R: c(
     person("Ken", "Williams", , "kenahoo@gmail.com", role = "ctb"),
     person("Mango Solutions", role = "cph")
     )
-Description: Download and install R packages stored in 'GitHub', 'GitLab', 
-    'Bitbucket', 'Bioconductor', or plain 'subversion' or 'git' repositories. 
-    This package provides the 'install_*' functions in 'devtools'. Indeed most 
-    of the code was copied over from 'devtools'.
+Description: Fork of r-lib/remotes adding functionality I've been unable to get merge-requests accepted for.
 License: GPL (>= 2)
-URL: https://remotes.r-lib.org, https://github.com/r-lib/remotes#readme
-BugReports: https://github.com/r-lib/remotes/issues
+URL: https://github.com/focusenergy/r-repositories
+BugReports: https://github.com/focusenergy/r-repositories/issues
 Imports:
     methods,
     stats,

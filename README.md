@@ -1,5 +1,20 @@
 
-# remotes
+# repositories
+
+This is a fork of the [remotes](https://github.com/r-lib/remotes)
+package from RStudio, adding some features & fixes that have not been
+merged back ("yet", we hope).  See
+https://github.com/r-lib/remotes/pull/305 for details of the features
+& fixes.
+
+Anywhere the docs/etc. says "remotes", assume that to use this package
+you need to change it to "repositories".  For example:
+
+```r
+library(repositories)
+# or
+repositories::install_version('data.table', '1.12.2')
+```
 
 > Install R Packages from remote or local repositories, 
 > including GitHub, GitLab, Bitbucket, and Bioconductor
