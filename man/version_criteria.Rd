@@ -8,14 +8,14 @@ version_criteria(criteria)
 }
 \arguments{
 \item{criteria}{character vector expressing criteria for some version to satisfy.  Options include:
-\begin{itemize}
+\itemize{
 \item \code{NULL} or \code{NA}, indicating that the package must be present, but need not satisfy any
 particular version
 \item An exact version required, as a string, e.g. \code{"0.1.13"}
 \item A comparison operator and a version, e.g. \code{">= 0.1.12"}
 \item Several criteria to satisfy, as a comma-separated string, e.g. \code{">= 1.12.0, < 1.14"}
 \item Several criteria to satisfy, as elements of a character vector, e.g. \code{c(">= 1.12.0", "< 1.14")}
-\end{itemize}}
+}}
 }
 \value{
 \code{data.frame} with columns \code{compare} and \code{version} expressing the criteria
