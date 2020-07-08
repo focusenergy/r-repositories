@@ -1,8 +1,9 @@
 
 skip_if_offline <- function(host = "httpbin.org", port = 80) {
 
+  func <- pingr::ping_port
   res <- tryCatch(
-    pingr::ping_port(host, count = 1L, port = port),
+    func(host, count = 1L, port = port),
     error = function(e) NA
   )
 
