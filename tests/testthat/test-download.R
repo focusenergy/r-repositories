@@ -202,7 +202,7 @@ test_that("base wget download with basic auth", {
   tmp <- tempfile()
   on.exit(unlink(tmp), add = TRUE)
   with_options(
-    list(download.file.method = "wget"),
+    list(download.file.method = "wget", download.file.extra = NULL),
          download(url, path = tmp, quiet = TRUE,
                   basic_auth = list(user = "ruser", password = "rpass")))
   expect_true(file.exists(tmp))
